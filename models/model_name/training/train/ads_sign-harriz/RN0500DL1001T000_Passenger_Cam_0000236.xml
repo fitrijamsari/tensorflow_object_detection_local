@@ -1,0 +1,38 @@
+<annotation>
+	<folder>ads_sign (copy)</folder>
+	<filename>RN0500DL1001T000_Passenger_Cam_0000236.jpg</filename>
+	<path>/home/ofotechjkr/workspace/tensorflow_OD/ofotech_train/models/04_signboard_fasterrcnn_inception640/pseudo/output/ads_sign (copy)/RN0500DL1001T000_Passenger_Cam_0000236.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>800</width>
+		<height>600</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>ads_sign</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>637</xmin>
+			<ymin>260</ymin>
+			<xmax>738</xmax>
+			<ymax>345</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>traffic_sign</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>171</xmin>
+			<ymin>133</ymin>
+			<xmax>243</xmax>
+			<ymax>226</ymax>
+		</bndbox>
+	</object>
+</annotation>

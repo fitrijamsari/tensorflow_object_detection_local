@@ -1,0 +1,38 @@
+<annotation>
+	<folder>ads_sign (copy)</folder>
+	<filename>PE3001UL1000T001_Passenger_Cam_0000232.jpg</filename>
+	<path>/home/ofotechjkr/workspace/tensorflow_OD/ofotech_train/models/04_signboard_fasterrcnn_inception640/pseudo/output/ads_sign (copy)/PE3001UL1000T001_Passenger_Cam_0000232.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>800</width>
+		<height>600</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>ads_sign</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>651</xmin>
+			<ymin>172</ymin>
+			<xmax>737</xmax>
+			<ymax>360</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>ads_sign</name>
+		<pose>Unspecified</pose>
+		<truncated>1</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>67</xmin>
+			<ymin>1</ymin>
+			<xmax>406</xmax>
+			<ymax>567</ymax>
+		</bndbox>
+	</object>
+</annotation>
