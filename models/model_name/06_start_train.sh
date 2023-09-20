@@ -1,4 +1,4 @@
-SERVER_DIR=/media/ofotechjkr/storage01/tf_object_detection
+SERVER_DIR=/media/ofotechjkr/storage01/2023_08_irad2/ml_training
 MODEL="faster_rcnn_inception_resnet_v2_640x640_coco17_tpu-8"
 NUM_TRAIN_STEPS=300000
 SAMPLE_1_OF_N_EVAL_EXAMPLES=1

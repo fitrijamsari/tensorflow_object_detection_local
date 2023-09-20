@@ -1,89 +1,57 @@
-# DESCRIPTION: THIS SCRIPT WILL MOVE: 1. IMAGES WITH NOT XML FILE 2. IMAGES WITH XML THAT DOES NOT CONTAIN LABEL (OBJECT)
-import xml.etree.ElementTree as ET
 import os
-import glob
-import argparse
 import shutil
+import xml.etree.ElementTree as ET
+import argparse
 
 parser = argparse.ArgumentParser()
 
 parser.add_argument("-i", "--input_dir", dest = "input_dir", default = "model", required=True, help="Name of the dataset directory")
+parser.add_argument("-o", "--output_dir", dest = "output_dir", default = "no_label", required=True, help="Name of the on_label directory")
 
 args = parser.parse_args()
 
-# DATASET_DIR = '/Users/ofotech_fitri/Documents/ofo_dev_project/selia/temp'
-DATASET_DIR = args.input_dir
-XML_PATHS = glob.glob(f'{DATASET_DIR}/**/*.xml', recursive=True)
-IMG_EXTS = ['*.jpg', '*.jpeg', '*.png', '*.JPG', '*.JPEG']
-IMAGE_PATHS =[]
-[IMAGE_PATHS.extend(glob.glob(f'{DATASET_DIR}/**/'+ x, recursive=True)) for x in IMG_EXTS]
-# IMAGE_PATHS = glob.glob(f'{DATASET_DIR}/**/*.jpg', recursive=True)
+# Define the directory where your dataset is stored
+# dataset_dir = "/media/ofotechjkr/storage01/2023_08_irad2/ml_training/models/2023_08_08_signboard/dataset/images"
+dataset_dir = args.input_dir
 
-def checkImageWithXML(image_path):
-    currentDir, imageFile = os.path.split(image_path)
-    # currentDir = os.path.dirname(image_path)
-    # imageFile = os.path.basename(image_path)
-    imageFilenameOnly = imageFile.split(".")[0]
-    if os.path.isfile(f'{currentDir}/{imageFilenameOnly}.xml'):
-        # print(f'{image_path}: xml exist')
-        return True
-    else:
-        print(f'{image_path}: xml do not exist.')
+# Define the output directory for cleaned data
+# output_dir = "/media/ofotechjkr/storage01/2023_08_irad2/ml_training/models/2023_08_08_signboard/dataset/images/no_label"
+output_dir = args.output_dir
+
+# Supported image file extensions
+image_extensions = ['.jpg', '.jpeg', '.png', '.JPG', '.JPEG','.PNG']
+
+def has_labels(xml_file):
+    try:
+        tree = ET.parse(xml_file)
+        root = tree.getroot()
+        return len(root.findall(".//object")) > 0
+    except ET.ParseError:
         return False
-    
-def moveImageIntoFolder(image_path):
-    currentDir = os.path.dirname(image_path)
-    noLabelFolder = createFolder(currentDir,folderName="no_label")
-    shutil.move(image_path, noLabelFolder)
-    return
 
-def checkXMLLabelExist(xml_file):
-    xmlTree = ET.parse(xml_file)
-    rootElement = xmlTree.getroot()
-    if len(rootElement.findall("object")) > 0:
-        # print(f"{xml_file}: label exist") 
-        return True
-    else:
-        print(f"{xml_file}: label do not exist") 
-        return False
-           
-def moveImageXmlIntoFolder(xml_file):
-    currentDir = os.path.dirname(xml_file)
-    noLabelFolder = createFolder(currentDir,folderName="no_label")
-    xmlFilenameOnly = xml_file.split('/')[-1].strip('.xml')
-    for images in IMAGE_PATHS:
-        imageFile = images.split("/")[-1]
-        imageFilenameOnly = imageFile.split(".")[0]
-        if imageFilenameOnly == xmlFilenameOnly:
-            shutil.move(images, noLabelFolder)
-            shutil.move(xml_file, noLabelFolder)
-    return
+def clean_dataset(dataset_dir, output_dir):
 
-def createFolder(outputDir,folderName):
-    newDirectoryPath = os.path.join(outputDir, folderName)
-    if not os.path.exists(newDirectoryPath):
-        os.mkdir(newDirectoryPath)
-    return newDirectoryPath
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
 
-def main():
-    if os.path.isdir(DATASET_DIR):
-        #move images without xml first in a folder, then compare the remaining xml files, if label exist
-        for image_path in IMAGE_PATHS:
-            is_imageWithXML = checkImageWithXML(image_path)
-            if is_imageWithXML == False:
-                moveImageIntoFolder(image_path)
+    for root_dir, _, files in os.walk(dataset_dir):
+        for file in files:
+            _, file_extension = os.path.splitext(file)
+            if file_extension.lower() in image_extensions:
+                image_path = os.path.join(root_dir, file)
+                xml_path = os.path.splitext(image_path)[0] + ".xml"
 
-        for xml_file in XML_PATHS:
-            is_XMLLabelExist = checkXMLLabelExist(xml_file)
-            if is_XMLLabelExist == False:
-                moveImageXmlIntoFolder(xml_file)
-
-        print("---------COMPLETE REMOVING UNLABEL DATASET---------") 
-
-    else:
-        print("Error: Directory does not exist") 
-
-if __name__ == '__main__':
-  main()
-
-# python3 remove_unlabel_dataset.py -i /Users/ofotech_fitri/Documents/ofo_dev_project/selia/bus_stop_m2_checked
+                if os.path.exists(xml_path):
+                    if not has_labels(xml_path):
+                        # Move both image and XML with labels
+                        print("Removed Image Contain Unlabelled Data")
+                        shutil.move(image_path, os.path.join(output_dir, file))
+                        shutil.move(xml_path, os.path.join(output_dir, os.path.basename(xml_path)))
+                else:
+                    # Move images without corresponding XML
+                    print("Removed Image did not contain respective xml file")
+                    shutil.move(image_path, os.path.join(output_dir, file))
+             
+if __name__ == "__main__":
+    clean_dataset(dataset_dir, output_dir)
+    print("Dataset cleaning complete.")

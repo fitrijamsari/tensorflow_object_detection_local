@@ -20,10 +20,11 @@ import pandas as pd
 import io
 import xml.etree.ElementTree as ET
 import argparse
+import PIL
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'    # Suppress TensorFlow logging (1)
 import tensorflow.compat.v1 as tf
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from object_detection.utils import dataset_util, label_map_util
 from collections import namedtuple
 
@@ -71,7 +72,7 @@ def xml_to_csv(path):
         # filename = xml_file.split('.')[0] + '.jpg'
         folder_path = os.path.dirname(xml_file)
         image_name = root.find('filename').text.split('/')[-1]
-        filename = (f'{folder_path}/{image_name}') 
+        filename = (f'{folder_path}/{image_name}')
         width = int(root.find('size').find('width').text)
         height = int(root.find('size').find('height').text)
         #value = None
@@ -126,6 +127,11 @@ def create_tf_example(group, path):
         encoded_jpg = fid.read()
     encoded_jpg_io = io.BytesIO(encoded_jpg)
     image = Image.open(encoded_jpg_io)
+    # try:
+    #     image = Image.open(encoded_jpg_io)
+    # except UnidentifiedImageError as e:
+    #     print(f"Error: {e}")
+    #     print(encoded_jpg_io)
     width, height = image.size
 
     filename = group.filename.encode('utf8')

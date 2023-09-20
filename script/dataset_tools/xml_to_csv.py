@@ -25,6 +25,7 @@ def xml_to_csv(path):
     xml_list = []
     for xml_file in glob.glob('{}/**/*.xml'.format(path), recursive=True):
         tree = ET.parse(xml_file)
+        # print(repr(xml_file))
         root = tree.getroot()
         filename = xml_file.split("/")[-1]
         width = int(root.find('size').find('width').text)

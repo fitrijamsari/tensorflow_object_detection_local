@@ -2,6 +2,7 @@
 import os
 import re
 import argparse
+import xml.etree.ElementTree as ET
 
 parser = argparse.ArgumentParser()
 
@@ -32,10 +33,28 @@ def clean_and_rename(path):
             if original_path != new_path:
                 os.rename(original_path, new_path)
                 print(f'Renamed File: {original_path} -> {new_path}')
+
+            # Update references in XML files
+            if extension.lower() == '.xml':
+                image_name = filename.split('.')[0] + '.jpg'
+                update_xml_references(root, filename, image_name)
     
     print("FINISHED RENAMING AND CLEANING")
 
+#edit xml <filename> with new name
+def update_xml_references(root, xml_filename, image_name):
+    xml_path = os.path.join(root, xml_filename)
+    
+    if os.path.exists(xml_path):
+        tree = ET.parse(xml_path)
+        root = tree.getroot()
+
+        for filename_element in root.iter('filename'):
+            filename_element.text = image_name
+
+        tree.write(xml_path)
+
 if __name__ == "__main__":
-    # target_directory = "/media/ofotechjkr/storage01/tf_object_detection/script/dataset_tools/images"
+    # target_directory = "/media/ofotechjkr/storage01/2023_08_irad2/ml_training/script/dataset_tools/images"
     target_directory = args.input_dir
     clean_and_rename(target_directory)
