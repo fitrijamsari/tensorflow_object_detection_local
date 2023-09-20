@@ -42,8 +42,9 @@ conda activate tfobj
 * copy dataset into "dataset/images". The dataset can be in subdirectory.
 
 ### 1.3 CLEAN DATASET FOLDER AND FILE NAME
-Need to ensure the folders and filenames do not have "space" and "symbols"
 
+**1.3.1 Clean filename**
+Need to ensure the folders and filenames do not have "space" and "symbols"
 1. Open the ***01_rename_space_with_underscore.sh*** in text editor and change the variable accordingly
 ```
 MODEL_DIR=model_name
@@ -55,6 +56,48 @@ DATASET_DIR=$SERVER_DIR/models/$MODEL_DIR/dataset/images
 ```
 sh 01_rename_space_with_underscore.sh 
 ```
+**1.3.2 Remove Any Corrupted Images**
+1. Open the ***02_check_corrupted_images.sh*** in text editor and change the variable accordingly
+```
+MODEL_DIR=model_name
+SERVER_DIR=/media/ofotechjkr/storage01/tf_object_detection
+DATASET_DIR=$SERVER_DIR/models/$MODEL_DIR/dataset/images
+CORRUPT_IMAGE_DIR=$SERVER_DIR/models/$MODEL_DIR/dataset/corrupted_images
+```
+2. run
+
+```
+sh 02_check_corrupted_images.sh
+```
+
+**1.3.3 Remove Any XML File Error**
+1. Open the ***02_check_xml_files_format.sh*** in text editor and change the variable accordingly
+```
+MODEL_DIR=model_name
+SERVER_DIR=/media/ofotechjkr/storage01/tf_object_detection
+DATASET_DIR=$SERVER_DIR/models/$MODEL_DIR/dataset/images
+NO_LABEL_DIR=$SERVER_DIR/models/$MODEL_DIR/dataset/xml_error 
+```
+2. run
+
+```
+sh 02_check_xml_files_format.sh
+```
+
+**1.3.4 Remove Unlabeled Dataset**
+1. Open the ***02_move_unlabel.sh*** in text editor and change the variable accordingly
+```
+MODEL_DIR=model_name
+SERVER_DIR=/media/ofotechjkr/storage01/tf_object_detection
+DATASET_DIR=$SERVER_DIR/models/$MODEL_DIR/dataset/images
+NO_LABEL_DIR=$SERVER_DIR/models/$MODEL_DIR/dataset/no_label 
+```
+2. run
+
+```
+sh 02_move_unlabel.sh
+```
+
 ### 1.4 DATASET EXPLORATION & ANALYSIS
 We need to analyse and explore the labelled dataset.
 
