@@ -3,7 +3,7 @@ import os
 import glob
 import cv2
 import shutil
-import xml_gen
+import script.legacy_script.xml_gen as xml_gen
 import numpy as np
 from PIL import Image
 import time

@@ -1,5 +1,5 @@
-MODEL_DIR=2023_08_08_signboard
-SERVER_DIR=/media/ofotechjkr/storage01/2023_08_irad2/ml_training
+MODEL_DIR=model_name
+SERVER_DIR=/media/ofotechjkr/storage01/tf_object_detection
 DATASET_DIR=$SERVER_DIR/models/$MODEL_DIR/dataset/images
 CORRUPT_IMAGE_DIR=$SERVER_DIR/models/$MODEL_DIR/dataset/corrupted_images
 
