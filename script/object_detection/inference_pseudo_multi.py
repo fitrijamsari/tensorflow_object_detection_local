@@ -3,7 +3,7 @@ import os
 import glob
 import cv2
 import shutil
-import xml_gen
+import script.legacy_script.xml_gen as xml_gen
 import time
 import numpy as np
 from PIL import Image
@@ -47,13 +47,13 @@ NO_DETECTION_DIR = f'{TRAINED_MODEL_DIR}/{MODEL_DIR_NAME}/pseudo/output/no_detec
 
 IMG_EXTS = ['*.jpg', '*.jpeg', '*.png']
 IMAGE_PATHS =[]
-NEW_IMAGE_PATHS = []
+# NEW_IMAGE_PATHS = []
 [IMAGE_PATHS.extend(glob.glob(f'{IMAGE_DIR}/**/'+ x, recursive=True)) for x in IMG_EXTS]
 
-for img in IMAGE_PATHS:
-  indicator = img.split("/")[-3]
-  if indicator == "PHOTO ASSET":
-    NEW_IMAGE_PATHS.append(img)
+# for img in IMAGE_PATHS:
+#   indicator = img.split("/")[-3]
+#   if indicator == "PHOTO ASSET":
+#     NEW_IMAGE_PATHS.append(img)
 
 
 # IMAGE_PATHS = glob.glob(f'{IMAGE_DIR}/**/*.jpg', recursive=True)
@@ -235,7 +235,7 @@ def xml_inference_multi(model, image_file):
     return out_detections
 
 def main():
-  for image_file in NEW_IMAGE_PATHS:
+  for image_file in IMAGE_PATHS:
     start_time = time.time()
     print('Running inference for {}'.format(image_file) + "\n", end='')
 

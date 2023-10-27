@@ -1,28 +1,45 @@
+from struct import unpack
 import os
 import shutil
 from PIL import Image
 import argparse
 
 parser = argparse.ArgumentParser()
-
-parser.add_argument("-i", "--input_dir", dest = "input_dir", default = "model", required=True, help="Name of the dataset directory")
-parser.add_argument("-o", "--output_dir", dest = "output_dir", default = "no_label", required=True, help="Name of the on_label directory")
-
+parser.add_argument("-i", "--input_dir", dest="input_dir", default="model", required=True, help="Name of the dataset directory")
+parser.add_argument("-o", "--output_dir", dest="output_dir", default="no_label", required=True, help="Name of the on_label directory")
 args = parser.parse_args()
 
-# Define the directory where your dataset is stored
-# root_dir = "/media/ofotechjkr/storage01/2023_08_irad2/ml_training/models/2023_08_08_signboard/dataset/images"
-root_dir = args.input_dir
+marker_mapping = {
+    0xffd8: "Start of Image",
+    0xffe0: "Application Default Header",
+    0xffdb: "Quantization Table",
+    0xffc0: "Start of Frame",
+    0xffc4: "Define Huffman Table",
+    0xffda: "Start of Scan",
+    0xffd9: "End of Image"
+}
 
-# Define the output directory for cleaned data
-# corrupted_images_dir = "/media/ofotechjkr/storage01/2023_08_irad2/ml_training/models/2023_08_08_signboard/dataset/corrupted_images"
-corrupted_images_dir = args.output_dir
+class JPEG:
+    def __init__(self, image_file):
+        with open(image_file, 'rb') as f:
+            self.img_data = f.read()
 
-# Ensure the "corrupted_images" directory exists; create it if not
-if not os.path.exists(corrupted_images_dir):
-    os.makedirs(corrupted_images_dir)
+    def decode(self):
+        data = self.img_data
+        while True:
+            marker, = unpack(">H", data[0:2])
+            if marker == 0xffd8:
+                data = data[2:]
+            elif marker == 0xffd9:
+                return
+            elif marker == 0xffda:
+                data = data[-2:]
+            else:
+                lenchunk, = unpack(">H", data[2:4])
+                data = data[2+lenchunk:]
+            if len(data) == 0:
+                break
 
-# Function to check if an image is corrupted
 def is_image_corrupted(image_path):
     try:
         with Image.open(image_path) as img:
@@ -31,29 +48,43 @@ def is_image_corrupted(image_path):
     except Exception:
         return True  # Image is corrupted
 
-# Recursively traverse subdirectories
-for root, dirs, files in os.walk(root_dir):
-    for filename in files:
-        if filename.lower().endswith((".jpg", ".jpeg", ".png")):
-            # Check if the image is corrupted
-            image_path = os.path.join(root, filename)
-            if is_image_corrupted(image_path):
-                # Move the corrupted image and its XML file to the "corrupted_images" folder
+def move_corrupted_images(root_dir, output_dir):
+    # Create the output directory if it doesn't exist
+    os.makedirs(output_dir, exist_ok=True)
+
+    for root, dirs, files in os.walk(root_dir):
+        for filename in files:
+            if filename.lower().endswith((".jpg", ".jpeg")):
+                image_path = os.path.join(root, filename)
                 xml_filename = os.path.splitext(filename)[0] + ".xml"
                 xml_path = os.path.join(root, xml_filename)
 
-                # Create a subfolder structure in "corrupted_images" to mimic the original directory structure
-                relative_path = os.path.relpath(root, root_dir)
-                destination_folder = os.path.join(corrupted_images_dir, relative_path)
-                os.makedirs(destination_folder, exist_ok=True)
+                # Check if the image is corrupted
+                if is_image_corrupted(image_path):
+                    # Move the corrupted image and its XML file to the output directory
+                    output_image_path = os.path.join(output_dir, filename)
+                    output_xml_path = os.path.join(output_dir, xml_filename)
 
-                # Move the corrupted image
-                shutil.move(image_path, os.path.join(destination_folder, filename))
+                    shutil.move(image_path, output_image_path)
+                    shutil.move(xml_path, output_xml_path)
 
-                # If there is an XML file, move it as well
-                if os.path.exists(xml_path):
-                    shutil.move(xml_path, os.path.join(destination_folder, xml_filename))
-                    
-                print(f"Moved corrupted image: {image_path} and XML: {xml_path} to {destination_folder}")
+                    print(f"Moved corrupted image: {image_path} and XML: {xml_path} to {output_dir}")
+                else:
+                    # If the image is not corrupted, try decoding it
+                    image = JPEG(image_path)
+                    try:
+                        image.decode()
+                    except:
+                        # If decoding fails, move the image and its XML file to the output directory
+                        output_image_path = os.path.join(output_dir, filename)
+                        output_xml_path = os.path.join(output_dir, xml_filename)
 
-print("Corrupted images check and move process complete.")
+                        shutil.move(image_path, output_image_path)
+                        shutil.move(xml_path, output_xml_path)
+
+                        print(f"Moved corrupted image: {image_path} and XML: {xml_path} to {output_dir}")
+
+if __name__ == "__main__":
+    move_corrupted_images(args.input_dir, args.output_dir)
+
+    print("Corrupted images check and move process complete.")
