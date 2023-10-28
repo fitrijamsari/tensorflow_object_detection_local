@@ -1,25 +1,38 @@
+import argparse
 import os
 import shutil
 import xml.etree.ElementTree as ET
-import argparse
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument("-i", "--input_dir", dest = "input_dir", default = "model", required=True, help="Name of the dataset directory")
-parser.add_argument("-o", "--output_dir", dest = "output_dir", default = "no_label", required=True, help="Name of the on_label directory")
+parser.add_argument(
+    "-i",
+    "--input_dir",
+    dest="input_dir",
+    default="model",
+    required=True,
+    help="Name of the dataset directory",
+)
+parser.add_argument(
+    "-o",
+    "--output_dir",
+    dest="output_dir",
+    default="no_label",
+    required=True,
+    help="Name of the on_label directory",
+)
 
 args = parser.parse_args()
 
 # Define the directory where your dataset is stored
-# dataset_dir = "/media/ofotechjkr/storage01/2023_08_irad2/ml_training/models/2023_08_08_signboard/dataset/images"
 dataset_dir = args.input_dir
 
 # Define the output directory for cleaned data
-# output_dir = "/media/ofotechjkr/storage01/2023_08_irad2/ml_training/models/2023_08_08_signboard/dataset/images/no_label"
 output_dir = args.output_dir
 
 # Supported image file extensions
-image_extensions = ['.jpg', '.jpeg', '.png', '.JPG', '.JPEG','.PNG']
+image_extensions = [".jpg", ".jpeg", ".png", ".JPG", ".JPEG", ".PNG"]
+
 
 def has_labels(xml_file):
     try:
@@ -29,8 +42,8 @@ def has_labels(xml_file):
     except ET.ParseError:
         return False
 
-def clean_dataset(dataset_dir, output_dir):
 
+def clean_dataset(dataset_dir, output_dir):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
@@ -45,13 +58,26 @@ def clean_dataset(dataset_dir, output_dir):
                     if not has_labels(xml_path):
                         # Move both image and XML with labels
                         print("Removed Image Contain Unlabelled Data")
-                        shutil.move(image_path, os.path.join(output_dir, file))
-                        shutil.move(xml_path, os.path.join(output_dir, os.path.basename(xml_path)))
+                        shutil.move(
+                            image_path, os.path.join(output_dir, file)
+                        )
+                        shutil.move(
+                            xml_path,
+                            os.path.join(
+                                output_dir, os.path.basename(xml_path)
+                            ),
+                        )
                 else:
                     # Move images without corresponding XML
-                    print("Removed Image did not contain respective xml file")
-                    shutil.move(image_path, os.path.join(output_dir, file))
-             
+                    print(
+                        "Removed Image did not contain respective xml"
+                        " file"
+                    )
+                    shutil.move(
+                        image_path, os.path.join(output_dir, file)
+                    )
+
+
 if __name__ == "__main__":
     clean_dataset(dataset_dir, output_dir)
     print("Dataset cleaning complete.")

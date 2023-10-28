@@ -1,6 +1,7 @@
 import os
 import shutil
 
+
 def move_files(source_folder, destination_folder):
     try:
         # Check if the source and destination folders exist
@@ -11,12 +12,18 @@ def move_files(source_folder, destination_folder):
             os.makedirs(destination_folder)
 
         # Get a list of all files in the source folder
-        files_to_move = [f for f in os.listdir(source_folder) if os.path.isfile(os.path.join(source_folder, f))]
+        files_to_move = [
+            f
+            for f in os.listdir(source_folder)
+            if os.path.isfile(os.path.join(source_folder, f))
+        ]
 
         # Move each file to the destination folder
         for file_name in files_to_move:
             source_path = os.path.join(source_folder, file_name)
-            destination_path = os.path.join(destination_folder, file_name)
+            destination_path = os.path.join(
+                destination_folder, file_name
+            )
             shutil.move(source_path, destination_path)
             print(f"Moved: {file_name}")
 
@@ -25,7 +32,8 @@ def move_files(source_folder, destination_folder):
     except Exception as e:
         print("An error occurred:", str(e))
 
+
 if __name__ == "__main__":
-    source_folder = "/media/ofotechjkr/storage01/2023_08_irad2/ml_training/models/2023_08_08_signboard/dataset/test/model_04/mixed/test"
-    destination_folder = "/media/ofotechjkr/storage01/2023_08_irad2/ml_training/models/2023_08_08_signboard/dataset/images/model_04/mixed"
+    source_folder = ""
+    destination_folder = ""
     move_files(source_folder, destination_folder)
