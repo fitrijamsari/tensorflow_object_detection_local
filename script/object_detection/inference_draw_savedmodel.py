@@ -9,9 +9,7 @@ import numpy as np
 from PIL import Image
 from six import BytesIO
 
-os.environ[
-    "TF_CPP_MIN_LOG_LEVEL"
-] = "2"  # Suppress TensorFlow logging (1)
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"  # Suppress TensorFlow logging (1)
 import tensorflow as tf
 from object_detection.builders import model_builder
 from object_detection.utils import config_util, label_map_util
@@ -26,11 +24,11 @@ warnings.filterwarnings("ignore")  # Suppress Matplotlib warnings
 parser = argparse.ArgumentParser()
 
 parser.add_argument(
-    "-d",
-    "--modeldir",
-    dest="modeldir",
-    default="model",
-    help="Name of the model directory",
+    "-t",
+    "--traindir",
+    dest="traindir",
+    default="none",
+    help="Name of the train directory",
 )
 parser.add_argument(
     "-thresh",
@@ -40,40 +38,25 @@ parser.add_argument(
     help="Min threshold",
     type=float,
 )
-parser.add_argument(
-    "-maindir",
-    "--maindir",
-    dest="repo-directory",
-    default="none",
-    help="directory project",
-)
 
 args = parser.parse_args()
 
 ##########################################SET DIRECTORY#########################################
-MODEL_DIR_NAME = args.modeldir
-MAIN_DIR = args.maindir
-TRAINED_MODEL_DIR = f"{MAIN_DIR}/models"
+TRAINED_MODEL_DIR = args.modeldir
 MODEL_DATE = "20200711"
-# MODEL_NAME = "centernet_resnet50_v1_fpn_512x512_coco17_tpu-8"
-PATH_TO_MODEL_DIR = (
-    f"{TRAINED_MODEL_DIR}/{MODEL_DIR_NAME}/output/model"
-)
+PRETRAIN_MODEL_NAME = "ssd_resnet101_v1_fpn_640x640_coco17_tpu-8"
+PATH_TO_MODEL_DIR = f"{TRAINED_MODEL_DIR}/output/model"
 PATH_TO_SAVED_MODEL = PATH_TO_MODEL_DIR + "/saved_model"
-PATH_TO_LABELS = (
-    f"{TRAINED_MODEL_DIR}/{MODEL_DIR_NAME}/dataset/labelmap.pbtxt"
-)
+PATH_TO_LABELS = f"{TRAINED_MODEL_DIR}/training/labelmap.pbtxt"
 
 # FOR DEBUGGING/MODEL TESTING
-IMAGE_DIR = "GIVE THE IMAGE DIRECTORY"
-OUTPUT_DIR = f"{TRAINED_MODEL_DIR}/{MODEL_DIR_NAME}/debug/output"
+IMAGE_DIR = f"{TRAINED_MODEL_DIR}/debug/dataset"
+OUTPUT_DIR = f"{TRAINED_MODEL_DIR}/debug/output"
 
 IMG_EXTS = ["*.jpg", "*.jpeg", "*.png", "*.JPG", "*.JPEG", "*.PNG"]
 IMAGE_PATHS = []
 [
-    IMAGE_PATHS.extend(
-        glob.glob(f"{IMAGE_DIR}/**/" + x, recursive=True)
-    )
+    IMAGE_PATHS.extend(glob.glob(f"{IMAGE_DIR}/**/" + x, recursive=True))
     for x in IMG_EXTS
 ]
 # IMAGE_PATHS = glob.glob(f'{IMAGE_DIR}/**/*.jpg', recursive=True)
@@ -103,11 +86,7 @@ if gpus:
     try:
         tf.config.experimental.set_virtual_device_configuration(
             gpus[0],
-            [
-                tf.config.experimental.VirtualDeviceConfiguration(
-                    memory_limit=1024
-                )
-            ],
+            [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=1024)],
         )
     except RuntimeError as e:
         print(e)
@@ -160,15 +139,12 @@ def draw_inference(image_path):
 
     num_detections = int(detections.pop("num_detections"))
     detections = {
-        key: value[0, :num_detections].numpy()
-        for key, value in detections.items()
+        key: value[0, :num_detections].numpy() for key, value in detections.items()
     }
     detections["num_detections"] = num_detections
 
     # detection_classes should be ints.
-    detections["detection_classes"] = detections[
-        "detection_classes"
-    ].astype(np.int64)
+    detections["detection_classes"] = detections["detection_classes"].astype(np.int64)
 
     # image_np_with_detections = load_image_into_numpy_array(image_path)
     image_np_with_detections = image_np.copy()
@@ -211,25 +187,18 @@ def main():
         end_time = time.time()
         elapsed_time = end_time - start_time
         processing_time.append(elapsed_time)
-        print(
-            "Processing Time per Image: {} seconds".format(
-                elapsed_time
-            )
-        )
+        print("Processing Time per Image: {} seconds".format(elapsed_time))
 
     total_processing_time = sum(processing_time)
     total_processing_time = "{:0.2f}".format(total_processing_time)
     total_image = len(image_count)
 
     print(
-        "--------------------------INFERENCE"
-        " SUMMARY--------------------------------"
+        "--------------------------INFERENCE" " SUMMARY--------------------------------"
     )
     print(f"Total Processed Image: {total_image}")
     print(f"Total Proccessing Time: {total_processing_time} seconds")
-    print(
-        "---------------------------------------------------------------------------"
-    )
+    print("---------------------------------------------------------------------------")
 
 
 if __name__ == "__main__":
