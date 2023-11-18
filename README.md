@@ -32,10 +32,11 @@ conda activate tfobj
    - output (folder)
    - pseudo(folder)
    - training (folder)
+   - 00_move_unlabel.sh
    - 01_rename_space_with_underscore.sh
    - 02_check_corrupted_images.sh
    - 03_check_xml_files_format.sh
-   - 04_move_unlabel.sh
+   - 04_rename_gopro_image_extension.sh
    - 05_dataset_xml_to_csv.sh
    - 06_split_dataset_subdir.sh
    - 07_create_tfrecord.sh
@@ -52,6 +53,23 @@ conda activate tfobj
 - copy dataset into "dataset/images". The dataset can be in subdirectory.
 
 ### 1.3 CLEAN DATASET FOLDER AND FILE NAME
+
+**1.3.0 Remove Unlabeled Dataset**
+
+1. Open the **_00_move_unlabel.sh_** in text editor and change the variable accordingly
+
+```
+MODEL_DIR=model_name
+SERVER_DIR=/YOUR_DIRECTORY/tensorflow_object_detection_local
+DATASET_DIR=$SERVER_DIR/models/$MODEL_DIR/dataset/images
+NO_LABEL_DIR=$SERVER_DIR/models/$MODEL_DIR/dataset/no_label
+```
+
+2. run
+
+```
+sh 00_move_unlabel.sh
+```
 
 **1.3.1 Clean filename**
 Need to ensure the folders and filenames do not have "space" and "symbols"
@@ -105,20 +123,21 @@ sh 03_check_xml_files_format.sh
 ```
 
 **1.3.4 Remove Unlabeled Dataset**
+GoPro images store in .JPG extension. If the data already been labelled by date engineer team, the same file extension will be stored in the .XML.
+However, for generate TfRecords, it only support for .jpg format. Hence, we need to format the file extension on the image and int the "filename" section inside each xml files.
 
-1. Open the **_04_move_unlabel.sh_** in text editor and change the variable accordingly
+1. Open the **_04_rename_gopro_image_extension.sh_** in text editor and change the variable accordingly
 
 ```
 MODEL_DIR=model_name
 SERVER_DIR=/YOUR_DIRECTORY/tensorflow_object_detection_local
-DATASET_DIR=$SERVER_DIR/models/$MODEL_DIR/dataset/images
-NO_LABEL_DIR=$SERVER_DIR/models/$MODEL_DIR/dataset/no_label
+DATASET_DIR=$SERVER_DIR/models/$MODEL_DIR/dataset/image
 ```
 
 2. run
 
 ```
-sh 04_move_unlabel.sh
+sh 04_rename_gopro_image_extension.sh
 ```
 
 ### 1.4 DATASET EXPLORATION & ANALYSIS
@@ -276,6 +295,29 @@ tensorboard --logdir=.
 
     copy link http://localhost:XXXX/ to browser
 
+### 3.4 MODEL EVALUATION
+
+1. Edit file **_10_start_eval.sh_**:
+
+```
+SERVER_DIR=/YOUR_DIRECTORY/tensorflow_object_detection_local
+MODEL="faster_rcnn_inception_resnet_v2_640x640_coco17_tpu-8"
+MODEL_DIR="output"
+PIPELINE_CONFIG_PATH="training/$MODEL/pipeline.config"
+CHECKPOINT_DIR=${MODEL_DIR}
+```
+
+> [!IMPORTANT]
+> MODEL: must be the same name as the folder name of the downloaded pretrained model which already located in training/
+
+2. run:
+
+```
+10_start_eval.sh
+```
+
+You can view the evaluation through tensorboard or on terminal
+
 ### 4. GENERATE MODEL
 
 Upon completion of traning, we need to generate the model.
@@ -345,5 +387,4 @@ SERVER_DIR=/YOUR_DIRECTORY/tensorflow_object_detection_local
 
 # FUTURE IMPROVMENT
 
-1. Enable for eval visualization.
-2. Enable for early stopping to avoid overfitting.
+1. Enable for early stopping to avoid overfitting.
