@@ -1,44 +1,61 @@
-from struct import unpack
+import argparse
 import os
 import shutil
+from struct import unpack
+
 from PIL import Image
-import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-i", "--input_dir", dest="input_dir", default="model", required=True, help="Name of the dataset directory")
-parser.add_argument("-o", "--output_dir", dest="output_dir", default="no_label", required=True, help="Name of the on_label directory")
+parser.add_argument(
+    "-i",
+    "--input_dir",
+    dest="input_dir",
+    default="input_dir",
+    required=True,
+    help="Name of the dataset directory",
+)
+parser.add_argument(
+    "-o",
+    "--output_dir",
+    dest="output_dir",
+    default="output_dir",
+    required=True,
+    help="Name of the on_label directory",
+)
 args = parser.parse_args()
 
 marker_mapping = {
-    0xffd8: "Start of Image",
-    0xffe0: "Application Default Header",
-    0xffdb: "Quantization Table",
-    0xffc0: "Start of Frame",
-    0xffc4: "Define Huffman Table",
-    0xffda: "Start of Scan",
-    0xffd9: "End of Image"
+    0xFFD8: "Start of Image",
+    0xFFE0: "Application Default Header",
+    0xFFDB: "Quantization Table",
+    0xFFC0: "Start of Frame",
+    0xFFC4: "Define Huffman Table",
+    0xFFDA: "Start of Scan",
+    0xFFD9: "End of Image",
 }
+
 
 class JPEG:
     def __init__(self, image_file):
-        with open(image_file, 'rb') as f:
+        with open(image_file, "rb") as f:
             self.img_data = f.read()
 
     def decode(self):
         data = self.img_data
         while True:
-            marker, = unpack(">H", data[0:2])
-            if marker == 0xffd8:
+            (marker,) = unpack(">H", data[0:2])
+            if marker == 0xFFD8:
                 data = data[2:]
-            elif marker == 0xffd9:
+            elif marker == 0xFFD9:
                 return
-            elif marker == 0xffda:
+            elif marker == 0xFFDA:
                 data = data[-2:]
             else:
-                lenchunk, = unpack(">H", data[2:4])
-                data = data[2+lenchunk:]
+                (lenchunk,) = unpack(">H", data[2:4])
+                data = data[2 + lenchunk :]
             if len(data) == 0:
                 break
+
 
 def is_image_corrupted(image_path):
     try:
@@ -47,6 +64,7 @@ def is_image_corrupted(image_path):
         return False  # Image is not corrupted
     except Exception:
         return True  # Image is corrupted
+
 
 def move_corrupted_images(root_dir, output_dir):
     # Create the output directory if it doesn't exist
@@ -68,7 +86,10 @@ def move_corrupted_images(root_dir, output_dir):
                     shutil.move(image_path, output_image_path)
                     shutil.move(xml_path, output_xml_path)
 
-                    print(f"Moved corrupted image: {image_path} and XML: {xml_path} to {output_dir}")
+                    print(
+                        f"Moved corrupted image: {image_path} and XML: {xml_path} to"
+                        f" {output_dir}"
+                    )
                 else:
                     # If the image is not corrupted, try decoding it
                     image = JPEG(image_path)
@@ -82,7 +103,11 @@ def move_corrupted_images(root_dir, output_dir):
                         shutil.move(image_path, output_image_path)
                         shutil.move(xml_path, output_xml_path)
 
-                        print(f"Moved corrupted image: {image_path} and XML: {xml_path} to {output_dir}")
+                        print(
+                            f"Moved corrupted image: {image_path} and XML:"
+                            f" {xml_path} to {output_dir}"
+                        )
+
 
 if __name__ == "__main__":
     move_corrupted_images(args.input_dir, args.output_dir)
