@@ -1,0 +1,26 @@
+<annotation>
+	<folder>111GOPRO_SH</folder>
+	<filename>G0058235.jpg</filename>
+	<path>E:\label iRAD\111GOPRO_SH\G0058235.JPG</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>1920</width>
+		<height>1440</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>transverse</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>604</xmin>
+			<ymin>135</ymin>
+			<xmax>1317</xmax>
+			<ymax>409</ymax>
+		</bndbox>
+	</object>
+</annotation>
